@@ -1,69 +1,54 @@
 import numpy as np
-import matplotlib.pyplot as plt
-
+# import matplotlib.pyplot as plt
 from random import randint
+
+from lagrange_polynomial import LagrangePolynomial
 
 
 class Scheme(object):
     """
     Implementation of Shamir's Secret Sharing scheme,
     """
-
     def __init__(self, s, n, k, p):
         """
-        S: secret
+        s: secret
         n: total number of shares
         k: recovery threshold
         p: prime, where p > n
         """
-
         self.s = s
         self.n = n
         self.k = k
         self.p = p
-
         # Generate random coefficients
-        self.coefs = [randint(1, self.s) for i in range(1, k)]
+        self.coefs = list(dict.fromkeys([randint(1, 65000) for i in range(1, k)]))
 
     def construct_shares(self):
-        pass
+        self.coefs.append(self.s)
+        values = np.polyval(self.coefs, [i for i in range(1, self.n + 1)]) % self.p
+        shares = {i: values[i - 1] for i in range(1, self.n + 1)}
+        # print(shares)
+        return shares
 
-    def reconstruct_secret(self, shares):
-        pass
-        # if len(shares) < self.k:
-        #    raise Exception("Need more participants") ili generisi neku neprepoznatljivu sliku
+    def reconstruct_secret(self, shares: dict, inputs: list):
+        if len(shares) < self.k:
+            raise Exception("Potreban veci broj delova")
 
+        for el in inputs:
+            if el not in shares.values():
+                raise Exception("Neodgovarajuci deo")
 
-class LagrangePoly:
+        indeksi = []
+        for i in range(len(inputs)):
+            indeksi.append(int(list(shares.keys())[list(shares.values()).index(inputs[i])]))
 
-    def __init__(self, X, Y):
-        self.n = len(X)
-        self.X = np.array(X)
-        self.Y = np.array(Y)
+        # print(indeksi)
+        # print([shares[ind] for ind in indeksi])
+        lp = LagrangePolynomial(indeksi, [shares[ind] for ind in indeksi])
 
-    def basis(self, x, i):
-        L = [(x - self.X[j]) / (self.X[i] - self.X[j])
-             for j in range(self.n) if j != i]
-        return np.prod(L, axis=0) * self.Y[i]
+        # plt.scatter(indeksi, [shares[ind] for ind in indeksi], c='k')
+        # plt.plot(indeksi, lp.interpolate(indeksi) % self.p, linestyle=':')
 
-    def interpolate(self, x):
-        p = [self.basis(x, i) for i in range(self.n)]
-        return np.sum(p, axis=0)
-
-
-# -----------------------------------------------------
-X = [-9, -4, -1, 7]
-Y = [5, 2, -2, 9]
-
-plt.scatter(X, Y, c='k')
-
-lp = LagrangePoly(X, Y)
-
-xx = np.arange(-100, 100) / 10
-# plt.plot(xx, lp.basis(xx, 0))
-# plt.plot(xx, lp.basis(xx, 1))
-# plt.plot(xx, lp.basis(xx, 2))
-# plt.plot(xx, lp.basis(xx, 3))
-plt.plot(xx, lp.interpolate(xx), linestyle=':')
-plt.show()
-# -----------------------------------------------------
+        secret = lp.interpolate(0) % self.p
+        # plt.show()
+        return secret
