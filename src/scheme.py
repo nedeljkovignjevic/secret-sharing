@@ -1,7 +1,5 @@
-import numpy as np
 from random import randint
-
-from lagrange_polynomial import LagrangePolynomial
+from lagrange_polynomial import LagrangePolynomial, np
 
 
 class Scheme(object):
