@@ -1,5 +1,4 @@
 import numpy as np
-# import matplotlib.pyplot as plt
 from random import randint
 
 from lagrange_polynomial import LagrangePolynomial
@@ -30,13 +29,14 @@ class Scheme(object):
         # print(shares)
         return shares
 
-    def reconstruct_secret(self, shares: dict, inputs: list):
-        if len(shares) < self.k:
-            raise Exception("Potreban veci broj delova")
+    @staticmethod
+    def reconstruct_secret(shares: dict, inputs: list, k, p):
+        if len(shares) < k:
+            raise Exception("More shares needed")
 
         for el in inputs:
             if el not in shares.values():
-                raise Exception("Neodgovarajuci deo")
+                raise Exception("Inadequate share")
 
         indeksi = []
         for i in range(len(inputs)):
@@ -49,6 +49,6 @@ class Scheme(object):
         # plt.scatter(indeksi, [shares[ind] for ind in indeksi], c='k')
         # plt.plot(indeksi, lp.interpolate(indeksi) % self.p, linestyle=':')
 
-        secret = lp.interpolate(0) % self.p
+        secret = lp.interpolate(0) % p
         # plt.show()
         return secret
