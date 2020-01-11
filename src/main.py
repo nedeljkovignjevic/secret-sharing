@@ -1,30 +1,44 @@
-import matplotlib.image as mpimg
-from PIL import Image
-import numpy as np
-
-from tkinter import simpledialog as sd
-
-from pic import split_parts_list, browse_img, datetime, reconstruct_image
-
+from pic import *
 
 if __name__ == '__main__':
 
     # ------------------------------------------------------------
     path = browse_img()
+    name, ext = os.path.splitext(path)
     t1 = datetime.now()
-    n = int(input("Number of shares: "))
-    k = int(input("Number of needed shares for reconstruction: "))
-    # split_parts(5, 3, 255, load_img(path), path)
-    split_parts_list(n, k, 257, mpimg.imread(path), path)
+    TK = tk.Tk()
+    TK.withdraw()
+    n = int(input("Number of shares  >>"))
+    k = int(input("Number of needed shares for reconstruction (TWO IS MIN)   >>"))
+    # # split_parts(5, 3, 255, load_img(path), path)
+    # img = mpimg.imread(path)
+    # image = Image.open(path)
+    pic = Image.open(path)
+    matrix = np.array(pic)
+    sharesRGB = split_parts_list(n, k, 257, matrix, path)
     print((datetime.now() - t1).seconds)
-    # unos = sd.askinteger("Number of shares for reconstruction of secret?",
-    #                     "Input in range (" + str(k) + "-" + str(n) + ")",
-    #                     initialvalue=k, minvalue=k, maxvalue=n)
-    # imgs = []
-    # for i in range(unos):
-    #    imgs.append(browse_img())
-    # reconstruct_image(imgs, n, k, unos)
+    unos = sd.askinteger("Number of shares for reconstruction of secret?",
+                        "Input in range (" + str(k) + "-" + str(n) + ")",
+                        initialvalue=k, minvalue=k, maxvalue=n)
+    imgs = []
+    for i in range(unos):
+        imgs.append(browse_img())
+    # print("+++++++++++++++++++++++++++SVE PODJELE++++++++++++++++++++++++++++")
+    # imgslst = [mpimg.imread(i) for i in imgs]
+    # j = 0
+    # for i in imgslst:
+    #     print("***********************"+str(j)+". slika**********************")
+    #     print(i)
+    #     print("**************************************************************")
+    # print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    # print("__________________________________________________________________")
+    # print(imgslst[0])
+    #reconstruct_image(imgs, n, k, unos)
     # ------------------------------------------------------------
+
+    matrix = reconstruct_image(imgs, k, 257, sharesRGB)
+    new_img = Image.fromarray(np.array(matrix), 'RGB')  # kreiranje shares - slika od novonastalih matrica
+    new_img.save("SECRET_RESTORED" + ext)
 
     # ------------------------------------------------------------
     # secret = int(input("Unesite broj kao sifru: "))
