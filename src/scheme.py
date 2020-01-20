@@ -1,11 +1,21 @@
 from random import randint
 from lagrange_polynomial import LagrangePolynomial, np
-from math import isnan
+
+
+def printToFile(fileWrite, data):
+    with open(fileWrite, 'w') as outfile:
+        outfile.write('# Array shape: {0}\n'.format(data.shape))
+
+        for data_slice in data:
+            np.savetxt(outfile, data_slice, fmt='%-10.2f')
+            outfile.write('# New slice\n')
+
 
 class Scheme(object):
     """
     Implementation of Shamir's Secret Sharing scheme,
     """
+
     def __init__(self, s, n, k, p):
         """
         s: secret
@@ -24,14 +34,12 @@ class Scheme(object):
         self.coefs.append(self.s)
         values = np.polyval(self.coefs, [i for i in range(1, self.n + 1)]) % self.p
         shares = {i: values[i - 1] for i in range(1, self.n + 1)}
-        # print(shares)
         return shares
 
     def construct_shares_image(self):
         self.coefs.append(self.s)
         values = np.polyval(self.coefs, [i for i in range(1, self.n + 1)]) % self.p
         shares = {}
-        # repeating = {}
         for i in range(1, self.n + 1):
             if int(values[i - 1]) != 256:
                 if int(values[i - 1]) == 0:
@@ -40,41 +48,6 @@ class Scheme(object):
             else:
                 shares[i] = 0
                 shares[self.n + 1] = 256
-        # for i in range(1, self.n + 1):
-        #     if int(values[i-1]) in shares.values():
-        #         repeating[i] = int(values[i-1])
-        #     else:
-        #         if int(values[i-1]) != 256:
-        #             if int(values[i - 1]) == 0:
-        #                 shares[self.n + 1] = 256
-        #             shares[i] = int(values[i - 1])
-        #         else:
-        #             shares[i] = 0
-        #             shares[self.n + 1] = 256
-        # for k in repeating.keys():
-        #     if repeating[k] not in shares.values():
-        #         shares[k] = repeating[k]
-        #     else:
-        #         over = False
-        #         if repeating[k] > 128:
-        #             over = True
-        #         rep = True
-        #         while rep:
-        #             if over:
-        #                 repeating[k] -= 1
-        #                 if repeating[k] == 0:
-        #                     rep = False
-        #                 if repeating[k] not in shares.values():
-        #                     shares[k] = repeating[k]
-        #                     rep = False
-        #             else:
-        #                 repeating[k] += 1
-        #                 if repeating[k] == 255:
-        #                     rep = False
-        #                 if repeating[k] not in shares.values():
-        #                     shares[k] = repeating[k]
-        #                     rep = False
-        # print(shares)
         return shares
 
     @staticmethod
@@ -123,12 +96,4 @@ class Scheme(object):
         lp = LagrangePolynomial(indeksi, [shares[ind[0]] for ind in indeksi])
 
         secret = lp.interpolate_img(0) % p
-        if isnan(secret):
-            print("----------------------------------------------------------------------")
-            print("Indeksi: ")
-            print(*indeksi, sep=", ")
-            print("Vrijednosti: ")
-            print(vals)
-            print("----------------------------------------------------------------------")
-            # plt.show()
         return secret

@@ -42,11 +42,11 @@ class LagrangePolynomial:
                         try:
                             if self.X[j][m] in temp or self.X[j][m] == self.X[i][k]:
                                 continue
-                            calc = (x-self.X[j][m])/(self.X[i][k]-self.X[j][m])
+                            calc = (x - self.X[j][m]) / (self.X[i][k] - self.X[j][m])
                             temp.append(self.X[j][m])
                             L.append(calc)
                             cont = True
-                            if len(L) == self.n-1:
+                            if len(L) == self.n - 1:
                                 done = True
                                 break
                         except ZeroDivisionError:
