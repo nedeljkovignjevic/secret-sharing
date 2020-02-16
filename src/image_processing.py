@@ -1,19 +1,7 @@
 from PIL import Image
-from tkinter import filedialog as fd
-from datetime import datetime
 from os import path
 from math import sqrt
 from scheme import Scheme, np
-
-
-def browse_img():
-    while True:
-        pname = fd.askopenfilename(
-            filetypes=[("Image format", ".tif .tiff .jpg .jpeg .gif .png .bmp .eps .raw .cr2 .nef .orf .sr2")])
-        print(pname)
-        if pname is not None:
-            break
-    return pname
 
 
 def split_parts_list(n, k, prime, img, path_pic):
@@ -25,7 +13,7 @@ def split_parts_list(n, k, prime, img, path_pic):
             [[[] for j in range(w)] for i in range(h)],
             [[[] for j in range(w)] for i in
              range(h)]]  # shares vrijednosti za svaki piksel RGB : shrs[0] je crvena ...
-    t1 = datetime.now()  # slika je matrica = niz nizova(redova) piksela
+     # slika je matrica = niz nizova(redova) piksela
     row_count = 0
     for row in img:  # za svaki red u nizu redova
         new_rows = np.zeros(shape=(n, w, 3))
