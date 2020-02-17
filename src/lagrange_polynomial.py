@@ -34,7 +34,7 @@ class LagrangePolynomial:
                 cont = False
                 for k in range(len(self.X[i])):
                     k += skip
-                    if k > len(self.X[i]):
+                    if k >= len(self.X[i]):
                         done = True
                         break
                     self.temp.append(self.X[i][k])
