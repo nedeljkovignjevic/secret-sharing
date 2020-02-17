@@ -24,6 +24,7 @@ class Ui_ShamirSecretSharing(object):
         self.dir_name = path.dirname(pname)
 
     def encrypt_img(self):
+        self.listWidget.clear()
         if self.label_29.pixmap() is None:
             self.error_message = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Critical, "Грешка", "Молим унесите слику")
             self.error_message.exec_()
@@ -83,20 +84,6 @@ class Ui_ShamirSecretSharing(object):
             for word in words_list:
                 self.listWidget_4.addItem(word)
 
-    # secret = int(input("Unesite broj kao sifru: "))
-    # s = Scheme(secret, 5, 3, 104729)
-    # shares = s.construct_shares()
-    #
-    # inputs = []
-    # while True:
-    #     pokusaj = input("Unesi deo sifre (za kraj unosa x): ")
-    #     if pokusaj == 'x':
-    #         break
-    #     inputs.append(int(pokusaj))
-    #
-    # returned_secret = s.reconstruct_secret(shares, inputs, 5, 3)
-    # print(returned_secret)
-
     def encrypt_number(self):
         self.listWidget_6.clear()
         if self.spinBox_5.value() == 0:
@@ -109,7 +96,7 @@ class Ui_ShamirSecretSharing(object):
             self.error_message.exec_()
         else:
             secret = self.spinBox_5.value()
-            self.secret_number = Scheme(secret, self.spinBox_12.value(), self.spinBox_11.value(), 104743)
+            self.secret_number = Scheme(secret, self.spinBox_12.value(), self.spinBox_11.value(), 5000003863) # 5000003863 2147483869
             self.shares_number = self.secret_number.construct_shares()
             for sh in self.shares_number:
                 self.listWidget_6.addItem(str(self.shares_number[sh]))
@@ -175,20 +162,34 @@ class Ui_ShamirSecretSharing(object):
             image_profile = image_profile.scaled(331, 251, aspectRatioMode=QtCore.Qt.KeepAspectRatio,
                                                  transformMode=QtCore.Qt.SmoothTransformation)  # skaliranje slike na 331x251 i ocuvanje aspect ratio
             self.label_30.setPixmap(QtGui.QPixmap.fromImage(image_profile))
+            self.listWidget_2.clear()
 
     def decrypt_text(self):
-        reconstructed_secret = ""
-        b = 0
-        for dic in self.text_shares:
-            reconstructed_secret += chr(int(Scheme.reconstruct_secret(dic, self.glavna_lista[b], self.spinBox_3.value(), 127)))
-            b += 1
-        self.textEdit_2.setText(reconstructed_secret)
-        self.listWidget_5.clear()
+        if self.textEdit.toPlainText() is None or self.textEdit.toPlainText() == "":
+            self.error_message = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Critical, "Грешка", "Молим унесите текст за енкрипцију")
+            self.error_message.exec_()
+        elif self.spinBox_4.value() == 0 or self.spinBox_4.value() < self.spinBox_3.value() or self.spinBox_3.value() == 0 or self.spinBox_3.value() < 2 or self.spinBox_4.value() < 2:
+            self.error_message = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Critical, "Грешка", "Неки од броја подјела није добар")
+            self.error_message.exec_()
+        elif self.listWidget_5.count() < self.spinBox_3.value():
+            self.error_message = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Critical, "Грешка", "Није унешено довољно дијелова")
+            self.error_message.exec_()
+        else:
+            reconstructed_secret = ""
+            b = 0
+            for dic in self.text_shares:
+                reconstructed_secret += chr(int(Scheme.reconstruct_secret_img(dic, self.glavna_lista[b], self.spinBox_3.value(), 127)))
+                b += 1
+            self.textEdit_2.setText(reconstructed_secret)
+            self.listWidget_5.clear()
+            self.glavna_lista = [[] for i in range(len(self.secret_text))]
 
     def decrypt_number(self):
-        returned_secret = self.secret_number.reconstruct_secret(self.shares_number, self.inputs, self.spinBox_11.value(), 104743)
+        returned_secret = int(round(self.secret_number.reconstruct_secret(self.shares_number, self.inputs, self.spinBox_11.value(), 5000003863))) # 5000003863 2147483869
         print(returned_secret)
         self.lcdNumber.display(returned_secret)
+        self.listWidget_7.clear()
+        self.inputs = []
 
     def setupUi(self, ShamirSecretSharing):
         ShamirSecretSharing.setObjectName("ShamirSecretSharing")
